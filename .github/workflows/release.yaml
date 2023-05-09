@@ -83,6 +83,14 @@ jobs:
       context: .
       dockerfile: docker/inference/Dockerfile.safety
       build-args: ""
+  build-model-training:
+    uses: ./.github/workflows/docker-build.yaml
+    needs: pre-commit
+    with:
+      image-name: oasst-model-training
+      context: .
+      dockerfile: docker/Dockerfile.model-training
+      build-args: ""
   deploy-to-node:
     needs:
       - build-backend
