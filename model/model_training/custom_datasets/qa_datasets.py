@@ -12,6 +12,7 @@ from typing import Any
 from urllib.request import urlopen
 
 import numpy as np
+import pandas as pd
 from datasets import load_dataset
 from model_training.custom_datasets.formatting import DatasetEntry
 from model_training.custom_datasets.utils import _filter_by_words
@@ -432,7 +433,13 @@ def load_alpaca_dataset(
         data = []
 
         for row in dataset:
+            if "inputs" in row:
+                # german_alpaca format
+                key_mapping = {"_instruction": "instruction", "input": "input", "output": "output"}
+                row = {new_key: row["inputs"][old_key] for old_key, new_key in key_mapping.items()}
+
             question = row["instruction"]
+
             if len(row["input"]) > 0:
                 input_ = "{}\n{}".format(question, row["input"])
             else:
@@ -451,8 +458,10 @@ def load_alpaca_dataset(
         dataset = load_dataset("yahma/alpaca-cleaned", cache_dir=cache_dir)
     elif dataset_name == "code_alpaca":
         dataset = load_dataset("sahil2801/CodeAlpaca-20k", cache_dir=cache_dir)
+    elif dataset_name == "german_alpaca":
+        dataset = load_dataset("LEL-A/translated_german_alpaca", cache_dir=cache_dir)
     else:
-        raise ValueError(f"Expected dataset_name to be 'alapaca' or 'code_alpaca'. Received {dataset_name}.")
+        raise ValueError(f"Expected dataset_name to be 'alapaca', 'german_alpaca' or 'code_alpaca'. Received {dataset_name}.")
 
     splits = random_split(dataset["train"], lengths=[1.0 - val_split, val_split], generator=generator)
     train = AlpacaBaseDataset(process_split(splits[0]), mode=mode)
@@ -602,3 +611,33 @@ class AlpacaGpt4(Dataset):
     def __getitem__(self, index: int) -> DatasetEntry:
         dialogue = self.rows[index]
         return dialogue
+
+class InstructGermanDPR(Dataset):
+    name = "instruct_german_dpr"
+    url = "https://github.com/LEL-A/EuroInstructProject/raw/main/instruct_data/InstructGermanDPR_v1_train.csv"
+
+    def __init__(self, cache_dir) -> None:
+        super().__init__()
+        os.makedirs(cache_dir, exist_ok=True)
+        filename = os.path.join(cache_dir, "InstructGermanDPR_v1_train.csv")
+
+        if not os.path.exists(filename):
+            with urlopen(self.url) as file:
+                content = file.read().decode()
+            with open(filename, "w") as fout:
+                fout.write(content)
+
+        df = pd.read_csv(filename)  # input,output,uuid
+
+        self.pairs = []
+
+        for _, row in df.iterrows():
+            self.pairs.append(DatasetEntry(questions=[row["input"]], answers=[row["output"]]))
+
+        self.length = len(self.pairs)
+        
+    def __len__(self) -> int:
+        return self.length
+
+    def __getitem__(self, index) -> DatasetEntry:
+        return self.pairs[index]

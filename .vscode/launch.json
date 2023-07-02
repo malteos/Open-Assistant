@@ -14,7 +14,9 @@
       "type": "python",
       "request": "launch",
       "program": "${file}",
-      "purpose": ["debug-test"],
+      "purpose": [
+        "debug-test"
+      ],
       "console": "integratedTerminal",
       "justMyCode": true
     },
@@ -24,7 +26,12 @@
       "request": "launch",
       "cwd": "${workspaceFolder}/model/model_training",
       "program": "trainer_sft.py",
-      "args": ["--configs", "defaults", "oasst_export_eu", "gpt-neox"],
+      "args": [
+        "--configs",
+        "defaults",
+        "oasst_export_eu",
+        "gpt-neox"
+      ],
       "console": "integratedTerminal",
       "justMyCode": true,
       "env": {
@@ -37,7 +44,12 @@
       "request": "launch",
       "cwd": "${workspaceFolder}/model/model_training",
       "program": "trainer_rm.py",
-      "args": ["--configs", "defaults_rm", "oasst_export_eu", "debug"],
+      "args": [
+        "--configs",
+        "defaults_rm",
+        "oasst_export_eu",
+        "debug"
+      ],
       "console": "integratedTerminal",
       "justMyCode": true,
       "env": {
@@ -105,6 +117,23 @@
       "env": {
         "CUDA_VISIBLE_DEVICES": "1,2,3,4,5",
         "OMP_NUM_THREADS": "1"
+      }
+    },
+    {
+      "name": "Debug SFT Training German",
+      "type": "python",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/model/model_training",
+      "program": "trainer_sft.py",
+      "args": [
+        "--configs",
+        "german_datasets_only",
+        "german_debug"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "TOKENIZERS_PARALLELISM": "false"
       }
     }
   ]

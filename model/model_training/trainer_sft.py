@@ -81,6 +81,12 @@ class SFTTrainer(Trainer):
         labels_mask = inputs.pop("label_masks")
         targets = inputs.pop("targets")
 
+        # Debug
+        # input_str = self.tokenizer.batch_decode(inputs["input_ids"])
+        # target_str = self.tokenizer.batch_decode(targets)
+        # print(f"INPUT = {input_str}\n\n")
+        # print(f"TARGET = {target_str}\n########\n")
+        
         outputs = model(
             input_ids=inputs["input_ids"],
             attention_mask=inputs.get("attention_mask", None),

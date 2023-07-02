@@ -1,0 +1,81 @@
+
+# model = AutoModelForCausalLM.from_pretrained('/netscratch/mostendorff/datasets/huggingface_transformers/pytorch/gpt2')
+# model = AutoModelForCausalLM.from_pretrained('/netscratch/mostendorff/datasets/huggingface_transformers/pytorch/gpt2-xl-wechsel-german')
+# model = AutoModelForCausalLM.from_pretrained('/netscratch/mostendorff/datasets/huggingface_transformers/pytorch/test-gs_24021')
+# model = AutoModelForCausalLM.from_pretrained('/netscratch/mostendorff/datasets/huggingface_transformers/pytorch/xglm-7.5B')
+# 
+german_debug:
+  # model_name: EleutherAI/pythia-70m-deduped
+  #model_name: /netscratch/mostendorff/experiments/oxw/data/bloom-6b4-clp-german-v1.1/tr1/hf_checkpoints/global_step31248
+  # model_name: /netscratch/mostendorff/datasets/huggingface_transformers/pytorch/gpt2-xl-wechsel-german
+  model_name: /netscratch/mostendorff/datasets/huggingface_transformers/pytorch/opengptx-clp-german-6b
+  output_dir: german_oasst_6b
+  eval_steps: 20
+  eval_size: 20
+  save_steps: 20
+  gradient_checkpointing: true
+  gradient_accumulation_steps: 1
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  quantization: false
+  log_wandb: false
+  # verbose: true
+  num_train_epochs: 0.1
+  # dtype: fp16
+  dtype: bf16
+  # deepspeed_config: configs/zero3_config_sft.json
+
+# pythia-6.9B:
+#   learning_rate: 8e-6
+#   model_name: EleutherAI/pythia-6.9b-deduped
+#   weight_decay: 0.0
+#   max_length: 2048
+#   warmup_steps: 20
+#   gradient_checkpointing: false
+#   gradient_accumulation_steps: 2
+#   per_device_train_batch_size: 4
+#   per_device_eval_batch_size: 4
+
+# Load config: . /netscratch/mostendorff/experiments/eulm/sbin/config.sh
+# Run via: python trainer_sft.py --configs german_6b german_datasets_only --wandb_entity malteos
+# Mostly copied from llama-7b and pythia-6.9B
+# ---
+# total steps: 21522 (bs = 4, gas = 2)
+# (bs = 32, gas = 2, works but slow => 8 hrs)
+# (bs = 8, gas = 4, 7 hrs)
+# (bs = 4, gas = 4, 6:30 hrs) => 10761 steps
+german_6b:
+  model_name: /netscratch/mostendorff/datasets/huggingface_transformers/pytorch/opengptx-clp-german-6b
+  output_dir: german_oasst_6b
+  log_dir: logs_german_oasst_6b
+  learning_rate: 8e-6
+  weight_decay: 0.0
+  max_length: 2048
+  warmup_steps: 20
+  gradient_checkpointing: true
+  gradient_accumulation_steps: 4
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  eval_steps: 1000
+  save_steps: 2500
+  save_total_limit: 3
+  use_flash_attention: false
+  log_wandb: true
+  num_train_epochs: 3
+  dtype: bf16
+
+
+# Validated datasets: instruct_german_dpr, german_alpaca, oasst_export
+# Too large 
+# - wmt2019_de-en  # (9 GB)
+
+german_datasets_only:
+  save_strategy: epoch
+  datasets:
+    - instruct_german_dpr
+    - german_alpaca
+    - oasst_export:
+        lang: "de"
+        input_file_path: 2023-03-27_oasst_research_ready_synth.jsonl.gz  
+    # - wmt2019_de-en
+    

@@ -19,6 +19,7 @@ from model_training.custom_datasets.qa_datasets import (
     TranslatedQA,
     Vicuna,
     WebGPT,
+    InstructGermanDPR,
     load_alpaca_dataset,
 )
 from model_training.custom_datasets.rank_datasets import AugmentedOA
@@ -121,7 +122,7 @@ def get_one_dataset(
         dataset = DiveMT()
     elif dataset_name == "webgpt":
         dataset = WebGPT(mode=mode)
-    elif dataset_name in ("alpaca", "code_alpaca"):
+    elif dataset_name in ("alpaca", "code_alpaca", "german_alpaca"):
         train, eval = load_alpaca_dataset(dataset_name, val_split=val_split, cache_dir=data_path, **kwargs)
     elif dataset_name == "gpt4all":
         dataset = Gpt4All(mode=mode, cache_dir=data_path)
@@ -169,6 +170,8 @@ def get_one_dataset(
         dataset = AlpacaGpt4(cache_dir=data_path, mode=mode, **kwargs)
     elif dataset_name == "red_pajama":
         dataset = RedPajama(cache_dir=data_path, mode=mode, **kwargs)
+    elif dataset_name == "instruct_german_dpr":
+        dataset = InstructGermanDPR(data_path)
     else:
         raise ValueError(f"Unknown dataset {dataset_name}")
 
